@@ -20,7 +20,7 @@
 <div class="row">
     <div class="col-12">
         <div class="alert alert-info">
-            <h3>MUNity MUNBW 2022 - Edition</h3>
+            <h3>MUNity MUN-SH 2023 - Edition</h3>
             <p>Willkommen bei MUNity. Der Open-Source Plattform für Model United Nations Konferenzen.</p>
         </div>
     </div>
@@ -69,13 +69,13 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <h5>MUNBW 2022 Beitritt</h5>
+                        <h5>MUN-SH 2023 Beitritt</h5>
                     </div>
                     <div class="card-body">
-                        <p>Die Beitrittslinks sind nun versteckt worden und befinden sich jetzt <a href="/c/managecommittees/munsh22">hier</a></p>
+                        <p>Die Beitrittslinks sind nun versteckt worden und befinden sich jetzt <a href="/c/managecommittees/munsh23">hier</a></p>
                         <h5>Beitritt für Vorsitzende</h5>
                         <div class="btn-group btn-group-vertical">
-                            @foreach(var committee in dbContext.Committees.Where(n => n.Conference.ConferenceId == "munbw22").Select(n => new { n.CommitteeId, n.Name, n.CommitteeShort}))
+                            @foreach(var committee in dbContext.Committees.Where(n => n.Conference.ConferenceId == "munsh23").Select(n => new { n.CommitteeId, n.Name, n.CommitteeShort}))
                             {
                                 <button class="btn @((committee.CommitteeShort == "SEK" || committee.CommitteeShort == "KFK") ? "btn-default" : "btn-primary")" @onclick="() => JoinAsTeam(committee.CommitteeId)">@committee.Name</button>
                             }

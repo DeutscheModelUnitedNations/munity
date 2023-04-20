@@ -22,7 +22,7 @@ COPY --from=publish /app/publish .
 # filled with test users.
 COPY src/MUNity.BlazorServer/demo.db .
 # COPY src/MUNity.BlazorServer/demo.db-shm .
-# COPY src/MUNity.BlazorServer/demo.db-wal .
+COPY src/MUNity.BlazorServer/demo.db-wal .
 ENV ASPNETCORE_URLS http://*:5000
 EXPOSE 5000
 ENTRYPOINT ["dotnet", "MUNity.BlazorServer.dll"]
