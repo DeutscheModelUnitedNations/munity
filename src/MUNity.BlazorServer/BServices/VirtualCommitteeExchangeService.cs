@@ -75,13 +75,42 @@ namespace MUNity.BlazorServer.BServices
         }
     }
 
+    public class UserConnectedEventArgs : EventArgs
+    {
+        public int RoleId { get; set; }
+
+        public UserConnectedEventArgs(int roleId)
+        {
+            this.RoleId = roleId;
+        }
+    }
+
+    public class UserDisconnectedEventArgs : EventArgs
+    {
+        public int RoleId { get; set; }
+
+        public UserDisconnectedEventArgs(int roleId)
+        {
+            this.RoleId = roleId;
+        }
+    }
+
+    public class PresentRole
+    {
+        public int RoleId { get; set; }
+
+        public bool IsPresent { get; set; }
+
+        public bool IsCountry { get; set; }
+    }
+
     public class VirtualCommitteeExchange
     {
         public string CommitteeId { get; private set; }
 
-        public event EventHandler UserConnected;
+        public event EventHandler<UserConnectedEventArgs> UserConnected;
 
-        public event EventHandler UserDisconnected;
+        public event EventHandler<UserDisconnectedEventArgs> UserDisconnected;
 
         public event EventHandler CurrentSessionChanged;
 
@@ -98,14 +127,14 @@ namespace MUNity.BlazorServer.BServices
 
         public ConcurrentDictionary<int, bool> connectedRoles = new ConcurrentDictionary<int, bool>();
 
-        public void NotifyUserConnected()
+        public void NotifyUserConnected(int roleId)
         {
-            UserConnected?.Invoke(this, EventArgs.Empty);
+            UserConnected?.Invoke(this, new UserConnectedEventArgs(roleId));
         }
 
-        public void NotifyUserDisconnected()
+        public void NotifyUserDisconnected(int roleId)
         {
-            UserDisconnected?.Invoke(this, EventArgs.Empty);
+            UserDisconnected?.Invoke(this, new UserDisconnectedEventArgs(roleId));
         }
 
         public void NotifyBannerChanged()

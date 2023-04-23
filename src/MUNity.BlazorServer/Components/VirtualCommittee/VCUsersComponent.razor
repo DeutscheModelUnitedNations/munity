@@ -1,7 +1,12 @@
-﻿@using MUNity.Database.Models.Conference.Roles
+﻿@using MUNity.BlazorServer.BServices;
+@using MUNity.Database.Models.Conference.Roles
+@using MUNity.BlazorServer.Extensions
+@using MUNity.ViewModels.ListOfSpeakers;
+
 @inject MunityContext dbContext
 @inject BServices.VirtualCommitteeExchangeService exchangeService
 @inject ILogger<VCUsersComponent> logger
+@inject Services.ListOfSpeakersService listOfSpeakersService
 
 <div class="card border-0 text-truncate mb-3 bg-gray-800 text-white">
 	<!-- BEGIN card-body -->
@@ -19,48 +24,85 @@
 		<!-- END conversion-rate -->
 		<!-- BEGIN percentage -->
 		<div class="mb-4 text-gray-500 ">
-			<span>@roles?.Count Insgesamt</span><br />
-			@if (roles != null && presentRoles == null)
+			<span>@roles2?.Count Insgesamt</span><br />
+			@if (roles2 != null)
 			{
-				<span>@(Math.Ceiling(@roles.Count(n => n.DelegateCountry != null) * 0.66)) Für 2/3 Mehrheit</span><br />
-				<span>@(Math.Ceiling(@roles.Count(n => n.DelegateCountry != null) * 0.5) + 1) Für einfache Mehrheit</span><br />
-			}
-			else if (presentRoles != null)
-			{
-				<span>@presentRoles.Count(n => n.IsPresent) Anwesend</span><br />
-				<span>@presentRoles.Count(n => n.IsPresent && n.IsCountry) Delegierte Anwesend</span><br />
-				<span>@(Math.Ceiling(presentRoles.Count(n => n.IsPresent && n.IsCountry) * 0.66)) Für 2/3 Mehrheit</span><br />
+				<b>Wenn alle Anwesend</b>
+				<span>@(Math.Ceiling(roles2.Count(n => n.IsCountry) * 0.66)) Für 2/3 Mehrheit</span><br />
+				<span>@(Math.Ceiling(roles2.Count(n => n.IsCountry) * 0.5) + 1) Für einfache Mehrheit</span><br />
+
+				<b>Mit aktueller Anwesenheit</b>
+				<span>@roles2.Count(n => n.IsPresent) Anwesend</span><br />
+				<span>@roles2.Count(n => n.IsPresent && n.IsCountry) Delegierte Anwesend</span><br />
+				<span>@(Math.Ceiling(roles2.Count(n => n.IsPresent && n.IsCountry) * 0.66)) Für 2/3 Mehrheit</span><br />
 				
-				@if (presentRoles.Count(n => n.IsPresent && n.IsCountry) % 2 == 0)
+				@if (roles2.Count(n => n.IsPresent && n.IsCountry) % 2 == 0)
 				{
-					<span>@(Math.Ceiling(presentRoles.Count(n => n.IsPresent && n.IsCountry) * 0.5 + 1d)) Für einfache Mehrheit</span><br />
+					<span>@(Math.Ceiling(roles2.Count(n => n.IsPresent && n.IsCountry) * 0.5 + 1d)) Für einfache Mehrheit</span><br />
 				}
 				else
 				{
-					<span>@(Math.Ceiling(presentRoles.Count(n => n.IsPresent && n.IsCountry) * 0.5)) Für einfache Mehrheit</span><br />
+					<span>@(Math.Ceiling(roles2.Count(n => n.IsPresent && n.IsCountry) * 0.5)) Für einfache Mehrheit</span><br />
 				}
-				
-			}
-			else
-			{
-				<span>Rollen sind null. Fehler erkannt!</span>
 			}
 		</div>
-		@if (roles != null && expand && exchange?.CurrentSessionExchange?.Petitions != null)
+		@if (roles2 != null && expand)
 		{
-			foreach(var role in roles)
+
+			@foreach(var role in roles2)
 			{
-				<VCUserComponent IsOnline=@(exchange.connectedRoles.ContainsKey(role.RoleId)) 
-				Role="@role" 
-				Highlight="@(role.RoleId == MyRoleId)"
-				RaisesHand="@exchange.CurrentSessionExchange.Petitions.Any(n => n.PetitionUserId == role.RoleId && n.PetitionCategoryName == "Persönlicher Antrag")"
-				hasProposition="@exchange.CurrentSessionExchange.Petitions.Any(n => n.PetitionUserId == role.RoleId && n.PetitionCategoryName != "Persönlicher Antrag")" 
-				IsPresent="@presentRoles.Any(n => n.RoleId == role.RoleId && n.IsPresent)" />
+						<div class="d-flex mb-2  @((role.RoleId == MyRoleId) ? "font-weight-bolder bg-teal-800 p-2" : null)">
+							<div class="d-flex align-items-center">
+								<!-- icon for online: fa-signal text-lime -->
+								<!-- icon if offline: fa-ban text-red-->
+								<i class="fa @(role.IsOnline ? "fa-signal text-lime" : "fa-ban text-red")  fs-8px me-2"></i>
+								<img class="me-2"  src="@($"/img/flags/small/{role?.Iso.ToLower()}.png")" style="width: 36px; height: 18px"/>
+						@role?.RoleName
+							</div>
+							<div class="d-flex align-items-center ms-auto">
+								<!-- Has an amendment/request on the top -->
+								<div class="@(role.HasAmendment ? "text-white" : "text-gray-500") fs-13px"><i class="fa fa-bookmark" title="Stellt einen Antrag"></i></div>
+								<div class="w-10px"></div>
+								<!-- Is currently speaking -->
+								<div class="@((role.SpeakerlistIndex != -1) ? "text-white" : "text-gray-500") fs-13px" @onclick="() => AddToSpeakerlist(role)">
+									<i class="fa fa-bullhorn" title="Steht auf der Redeliste/Fragen"></i>
+									@if (role.SpeakerlistIndex == -1)
+									{
+										<span class="badge bg-dark ms-1">-</span>
+
+									}
+									else
+									{
+										<span class="badge bg-primary ms-1">@(role.SpeakerlistIndex + 1)</span>
+									}
+								</div>
+
+								<div class="@((role.QuestionIndex != -1) ? "text-white" : "text-gray-500") fs-13px">
+									<i class="fa fa-question" title="Steht auf der Fragen"></i>
+									@if (role.QuestionIndex == -1)
+									{
+										<span class="badge bg-dark ms-1">-</span>
+
+									}
+									else
+									{
+										<span class="badge bg-warning ms-1">@(role.QuestionIndex + 1)</span>
+									}
+								</div>
+
+								<div class="w-10px"></div>
+								<!-- Marked as present -->
+								<div class="@(role.IsPresent ? "text-white" : "text-gray-500")  fs-13px"><i class="fa fa-check" title="Markiert als Anwesend/Abwesend"></i></div>
+							</div>
+						</div>
 			}
 		}
 		else
 		{
-			<p>Unable to generate list of users.</p>
+			if (expand)
+			{
+				<p>Unable to generate list of users.</p>
+			}
 		}
 
 	</div>
@@ -72,59 +114,148 @@
 
 	[Parameter] public int? MyRoleId { get; set; }
 
-	private List<ConferenceDelegateRole> roles;
+	[Parameter] public string ListOfSpeakersId { get; set; }
+
+	private List<RoleRepresentation> roles2;
 
 	private Random rnd;
 
 	private List<Database.General.Country> countries = new();
 
-	private List<PresentRole> presentRoles = new();
-
 	private BServices.VirtualCommitteeExchange exchange;
 
 	private bool expand = true;
+
+	ListOfSpeakersViewModel speakerlist;
+
+	private class RoleRepresentation
+	{
+		public int RoleId { get; set; }
+
+		public string RoleName { get; set; }
+
+		public string Iso { get; set; }
+
+		public bool IsOnline { get; set; }
+
+		public bool HasAmendment { get; set; }
+
+		public int SpeakerlistIndex { get; set; } = -1;
+
+		public int QuestionIndex { get; set; } = -1;
+
+		public bool IsPresent { get; set; }
+
+		public bool IsCountry { get; set; }
+	}
+
+	private void AddToSpeakerlist(RoleRepresentation rep)
+	{
+		speakerlist.AddSpeaker(rep.RoleName, rep.Iso);
+	}
+
+	private void GenerateRepresentiveList()
+	{
+
+		speakerlist = listOfSpeakersService.GetViewModel(ListOfSpeakersId);
+
+		if (speakerlist != null)
+		{
+			speakerlist.AllSpeakers.CollectionChanged += (s, e) =>
+			{
+				foreach (var r in roles2)
+				{
+					r.SpeakerlistIndex = speakerlist.Speakers.FindIndex(n => n.Name == r.RoleName);
+					r.QuestionIndex = speakerlist.Questions.FindIndex(n => n.Name == r.RoleName);
+				}
+				InvokeAsync(StateHasChanged);
+			};
+		}
+		else
+		{
+			logger?.LogWarning("No speakerlist for id: {speakerlistid}", ListOfSpeakersId);
+		}
+
+
+		roles2 = dbContext.Delegates
+			.Where(n => n.Committee.CommitteeId == CommitteeId)
+			.Include(n => n.DelegateCountry)
+			.Select(n => new RoleRepresentation()
+				{
+					RoleId = n.RoleId,
+					RoleName = n.RoleName,
+					Iso = n.DelegateCountry.Iso ?? "UN",
+					IsCountry = n.DelegateCountry != null
+				})
+			.ToList();
+
+		var presentRoles = dbContext.PresentStates.Where(n => n.SessionPresents.Session.CommitteeSessionId == this.exchange.CurrentSessionExchange.SessionId)
+			.Select(n => new PresentRole()
+			{
+				RoleId = n.Role.RoleId,
+				IsPresent = n.State == Database.Models.Session.PresentsState.PresentsStates.Present || n.State == Database.Models.Session.PresentsState.PresentsStates.Late,
+				IsCountry = n.Role.DelegateCountry != null
+			}).ToList();
+
+		foreach(var role in roles2)
+		{
+			role.HasAmendment = exchange?.CurrentSessionExchange?.Petitions?.Any(n => n.PetitionUserId == role.RoleId) ?? false;
+			role.SpeakerlistIndex = speakerlist?.Speakers.FindIndex(n => n.Name == role.RoleName) ?? -1;
+			role.QuestionIndex = speakerlist?.Questions.FindIndex(n => n.Name == role.RoleName) ?? -1;
+			role.IsOnline = exchange?.connectedRoles?.ContainsKey(role.RoleId) ?? false;
+			role.IsPresent = presentRoles.FirstOrDefault(n => n.RoleId == role.RoleId)?.IsPresent ?? false;
+		}
+	}
 
 	private void Init()
 	{
 
 		this.exchange = exchangeService.GetExchange(CommitteeId);
+
+		GenerateRepresentiveList();
+
 		if (this.exchange != null)
 		{
-			this.exchange.UserConnected += (s, a) => InvokeAsync(StateHasChanged);
-			this.exchange.UserDisconnected += (s, a) => InvokeAsync(StateHasChanged);
-			this.exchange.CurrentSessionChanged += delegate { InvokeAsync(StateHasChanged); };
-			this.exchange.PresentsChanged += (s, a) => { this.presentRoles = a; InvokeAsync(StateHasChanged); };
-			if (exchange.CurrentSessionExchange != null)
-			{
-				if (exchange.CurrentSessionExchange.Petitions == null)
-				{
-					this.exchange.CurrentSessionExchange.Petitions.CollectionChanged += delegate { InvokeAsync(StateHasChanged); };
-				}
-				else
-				{
-					this.exchange.CurrentSessionExchange.Petitions = new System.Collections.ObjectModel.ObservableCollection<VirtualCommittees.Dtos.PetitionDto>();
-					this.exchange.CurrentSessionExchange.Petitions.CollectionChanged += delegate { InvokeAsync(StateHasChanged); };
-					logger?.LogError("Petitions were null and created a new list of petitions.");
-				}
 
-				this.presentRoles = dbContext.PresentStates.Where(n => n.SessionPresents.Session.CommitteeSessionId == this.exchange.CurrentSessionExchange.SessionId)
-				.Select(n => new PresentRole()
-				{
-					RoleId = n.Role.RoleId,
-					IsPresent = n.State == Database.Models.Session.PresentsState.PresentsStates.Present || n.State == Database.Models.Session.PresentsState.PresentsStates.Late,
-					IsCountry = n.Role.DelegateCountry != null
-				}).ToList();
-			}
-			else
+			this.exchange.UserConnected += (s, a) =>
 			{
-				logger?.LogError("CurrentSession in exchange in null.");
-			}
+				var fittingRole = roles2.FirstOrDefault(n => n.RoleId == a.RoleId);
+				if (fittingRole != null)
+				{
+					fittingRole.IsOnline = true;
+					InvokeAsync(StateHasChanged);
+				}
+			};
+			this.exchange.UserDisconnected += (s, a) =>
+			{
+				var fittingRole = roles2.FirstOrDefault(n => n.RoleId == a.RoleId);
+				if (fittingRole != null)
+				{
+					fittingRole.IsOnline = false;
+					InvokeAsync(StateHasChanged);
+				}
+			};
+			this.exchange.CurrentSessionChanged += (s, e) =>
+			{
+				Init();
+			};
+			this.exchange.PresentsChanged += (s, a) => { 
+				foreach(var r in a)
+				{
+					var target = roles2.FirstOrDefault(n => n.RoleId == r.RoleId);
+					if (target != null)
+					{
+						target.IsPresent = r.IsPresent;
+					}
+				}
+				InvokeAsync(StateHasChanged); 
+			};
+
 		}
 		else
 		{
 			logger?.LogError("No exchange for committee {0} found.", CommitteeId);
 		}
-		roles = dbContext.Delegates.Include(n => n.DelegateCountry).Where(n => n.Committee.CommitteeId == CommitteeId).ToList();
 
 
 	}
@@ -133,15 +264,6 @@
 	{
 		base.OnParametersSet();
 		Init();
-	}
-
-	public class PresentRole
-	{
-		public int RoleId { get; set; }
-
-		public bool IsPresent { get; set; }
-
-		public bool IsCountry { get; set; }
 	}
 
 }

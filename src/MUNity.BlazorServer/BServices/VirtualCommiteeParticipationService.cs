@@ -89,7 +89,7 @@ namespace MUNity.BlazorServer.BServices
 
             if (_roleId != null && _exchange.connectedRoles.TryRemove(_roleId.Value, out var t) == true)
             {
-                _exchange.NotifyUserDisconnected();
+                _exchange.NotifyUserDisconnected(_roleId.Value);
             }
             this._roleId = null;
             this._roleName = string.Empty;
@@ -125,7 +125,7 @@ namespace MUNity.BlazorServer.BServices
             if (_exchange != null && this._roleId != null)
             {
                 _exchange.connectedRoles.TryAdd(this._roleId.Value, true);
-                _exchange.NotifyUserConnected();
+                _exchange.NotifyUserConnected(this._roleId.Value);
             }
             this.Registered?.Invoke(this, EventArgs.Empty);
             return true;
