@@ -1,0 +1,22 @@
+﻿@if (DevTooling.EnableDevTools)
+{
+    <p style="position: absolute; left:0px; top:0px; color: red; z-index: 1000">Comp: @Parent?.GetType().Name</p>
+}
+else
+{
+    <p style="position: absolute; left:0px; top:0px; color: red; z-index: 1000">Debug off</p>
+}
+
+
+@code {
+    [CascadingParameter]public ComponentBase Parent { get; set; }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        DevTooling.DevToolsChanged += (s, e) =>
+        {
+            InvokeAsync(StateHasChanged);
+        };
+    }
+}

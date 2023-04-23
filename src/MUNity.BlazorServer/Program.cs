@@ -16,6 +16,7 @@ using MUNity.Database.Models.User;
 using Microsoft.EntityFrameworkCore;
 using Blazored.LocalStorage;
 using MUNity.BlazorServer.BServices;
+using MUNity.BlazorServer;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -100,6 +101,7 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
+    DevTooling.EnableDevTools = true;
 }
 
 app.UseHttpsRedirection();
