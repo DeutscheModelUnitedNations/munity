@@ -2,7 +2,7 @@
 @inject MunityContext dbContext
 @inject NavigationManager navManger
 
-<div class="card border-0 mb-3 bg-gray-900 text-white">
+<div class="card border-0 bg-gray-900 text-white">
 	<!-- BEGIN card-body -->
 	<div class="card-body cursor-pointer" 
 	style="background: no-repeat bottom right; background-image: url(/img/svg/img-4.svg); background-size: auto 60%;"
@@ -16,7 +16,7 @@
 		<h3 class="mb-10px">@info?.DelegatesCount Delegierte</h3>
 		<!-- END sales -->
 		<!-- BEGIN percentage -->
-		<div class="text-gray-500 mb-1px">@CommitteeId @(CommitteeId.GetHashCode() % 256)</div>
+		<div class="text-gray-500 mb-1px">@CommitteeId</div>
 		<!-- END percentage -->
 	</div>
 	<!-- END card-body -->

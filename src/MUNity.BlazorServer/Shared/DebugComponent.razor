@@ -1,15 +1,17 @@
 ﻿@if (DevTooling.EnableDevTools)
 {
-    <p style="position: absolute; left:0px; top:0px; color: red; z-index: 1000">Comp: @Parent?.GetType().Name</p>
-}
-else
-{
-    <p style="position: absolute; left:0px; top:0px; color: red; z-index: 1000">Debug off</p>
+    <div style="position: relative;z-index: 9000; top: 5px; left:10px; max-width: 400px; background-color:red; border-color: orange; border: dashed; padding: 1px; opacity: 0.6">
+        <span style="color: white; z-index: 1000">@Parent?.GetType().AssemblyQualifiedName.Split(",")[0]</span>
+    </div>
+    
 }
 
+@*<div class="position-absolute">
+    <p style="position: absolute; left:0px; top:0px; color: red; z-index: 1000">Comp: @Parent?.GetType().Name</p>
+</div>*@
 
 @code {
-    [CascadingParameter]public ComponentBase Parent { get; set; }
+    [Parameter][EditorRequired]public ComponentBase Parent { get; set; }
 
     protected override void OnInitialized()
     {
