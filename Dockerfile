@@ -4,7 +4,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:7.0-alpine AS base
 WORKDIR /app
 
 # API
-FROM mcr.microsoft.com/dotnet/aspnet:7.0-alpine AS build
+FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /
 COPY . .
 RUN dotnet restore "src/MUNity.BlazorServer/MUNity.BlazorServer.csproj"
