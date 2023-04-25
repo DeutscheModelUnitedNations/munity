@@ -4,6 +4,7 @@
 
 @inject MunityContext dbContext
 @inject Services.UserConferenceAuthService confAuthService
+@inject DialogService dialogService
 
 <AuthorizeView>
     <Authorized>
@@ -11,18 +12,31 @@
         {
             <h1 class="page-header">@committee.Name <small>@committee.FullName</small></h1>
 
-
             <div class="row">
                 <div class="col-8">
                     <div class="card">
                         <div class="card-body">
-	                         <h5>Themen</h5>
-                            <ul>
-                                @foreach(var topic in committee.Topics)
-                                {
-                                    <li>@topic.TopicName</li>
-                                }
-                            </ul>
+	                         <h5>Themen </h5>
+                             <table class="table">
+                                 <thead>
+                                     <th>Name</th>
+                                     <th>Vollständiger Name</th>
+                                     <th>Code</th>
+                                     <th>Aktion</th>
+                                 </thead>
+                                 <tbody>
+                                        @foreach(var topic in committee.Topics)
+                                        {
+                                            <tr>
+                                                <td>@topic.TopicName</td>
+                                                <td>@topic.TopicFullName</td>
+                                                <td>@topic.TopicCode</td>
+                                                <td><button class="btn btn-danger btn-sm" @onclick="() => OpenConfirmDeleteTopic(topic)"><i class="fa fa-trash"></i></button></td>
+                                            </tr>
+                                        }
+                                 </tbody>
+                            </table>
+                            <button class="btn btn-success mb-3" @onclick=OpenCreateTopicDialog>Neues Thema</button>
 
                             <h5>Antragsarten</h5>
                             <ol>
@@ -54,9 +68,9 @@
                                 }
                                 
                             }
- 
 
-                        </div>
+                        </div> <!-- End of body -->
+ 
                     </div>
 
                     <div class="card mt-2">
@@ -91,6 +105,20 @@
 									    </div>
 								    </a>
                                 }
+                                
+
+                                <a href="oc/@Id" class="widget-list-item">
+									<div class="widget-list-media icon">
+										<i class="fa fa-house bg-inverse text-white"></i>
+									</div>
+									<div class="widget-list-content">
+										<h4 class="widget-list-title">Sitzungsfenster</h4>
+									</div>
+									<div class="widget-list-action text-end">
+										<i class="fa fa-angle-right fa-lg text-gray-500"></i>
+									</div>
+								</a>
+                                
                                 
 							</div>
                         </div>
@@ -188,6 +216,21 @@
             await InvokeAsync(StateHasChanged);
         }
         this.listOfSpeakersId = dbContext.Committees.Where(n => n.CommitteeId == Id).Select(n => n.ListOfSpeakers.ListOfSpeakersId).FirstOrDefault();
+    }
+
+    private async Task OpenCreateTopicDialog()
+    {
+        await dialogService.OpenAsync<CreateTopicComponent>("Create a topic", new Dictionary<string, object>() { { "CommitteeId", this.Id } });
+    }
+
+    private async Task OpenConfirmDeleteTopic(CommitteeTopic topic)
+    {
+        var result = await dialogService.Confirm($"Soll das Thema '{topic.TopicName}' wirklich entfernt werden?", "Thema löschen", Sharable.YesNoOptions);
+        if (result == true)
+        {
+            dbContext.CommitteeTopics.Remove(topic);
+            dbContext.SaveChanges();
+        }
     }
 
     private void CreateSession()

@@ -3,7 +3,12 @@
 @inject NavigationManager navManager
 @inject MUNity.Database.Context.MunityContext context
 
+@*<DebugComponent Parent="this" />*@
+
 <div id="header" class="app-header">
+
+
+
     <!-- BEGIN navbar-header -->
     <div class="navbar-header">
         <a href="/" class="navbar-brand"><span class="navbar-logo"></span> <b>@title</b></a>
@@ -36,6 +41,8 @@
     </div>
     <!-- END header-nav -->
 </div>
+
+
 
 @code {
     private string title { get; set; } = "MUNity";

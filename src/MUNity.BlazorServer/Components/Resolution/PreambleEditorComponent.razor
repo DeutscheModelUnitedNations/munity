@@ -22,7 +22,8 @@
 	Paragraph=paragraph 
 	IsFirst=@(paragraph == Exchange.Resolution.PreambleParagraphs.First()) 
 	IsLast=@(paragraph == Exchange.Resolution.PreambleParagraphs.Last()) 
-	CanEdit=@CanEdit/>
+	CanEdit=@CanEdit 
+	IsReaderMode=@IsReaderMode />
 }
 
 @if (CanEdit && !IsReaderMode)
