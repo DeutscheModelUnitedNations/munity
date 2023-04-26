@@ -16,8 +16,6 @@ public class CommitteeTopic
 {
     public int CommitteeTopicId { get; set; }
 
-    [Required]
-    [MinLength(1)]
     [MaxLength(150)]
     public string TopicName { get; set; }
 

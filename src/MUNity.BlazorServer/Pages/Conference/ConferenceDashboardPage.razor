@@ -15,7 +15,7 @@
 
     <div class="row">
         <!-- BEGIN col-3 -->
-        <div class="col-xl-4 col-md-6">
+        <div class="col-xl-3 col-md-6">
             <div class="widget widget-stats bg-blue">
                 <div class="stats-icon"><i class="fa fa-desktop"></i></div>
                 <div class="stats-info">
@@ -29,7 +29,7 @@
         </div>
         <!-- END col-3 -->
         <!-- BEGIN col-3 -->
-        <div class="col-xl-4 col-md-6">
+        <div class="col-xl-3 col-md-6">
             <div class="widget widget-stats bg-info">
                 <div class="stats-icon"><i class="fa fa-link"></i></div>
                 <div class="stats-info">
@@ -43,7 +43,7 @@
         </div>
         <!-- END col-3 -->
         <!-- BEGIN col-3 -->
-        <div class="col-xl-4 col-md-6">
+        <div class="col-xl-3 col-md-6">
             <div class="widget widget-stats bg-orange">
                 <div class="stats-icon"><i class="fa fa-users"></i></div>
                 <div class="stats-info">
@@ -55,24 +55,38 @@
                 </div>
             </div>
         </div>
-
+        <!-- END col-3 -->
+        <!-- BEGIN col-3 -->
+        <div class="col-xl-3 col-md-6">
+            <div class="widget widget-stats bg-red">
+                <div class="stats-icon"><i class="fa fa-clock"></i></div>
+                <div class="stats-info">
+                    <h4>TODO</h4>
+                    <p>00:12:23</p>
+                </div>
+                <div class="stats-link">
+                    <a href="javascript:;">View Detail <i class="fa fa-arrow-alt-circle-right"></i></a>
+                </div>
+            </div>
+        </div>
+        <!-- END col-3 -->
     </div>
 
     <div class="row">
         @foreach(var committeeId in dbContext.Committees.AsNoTracking().Where(n => n.Conference.ConferenceId == Id).Select(n => n.CommitteeId))
         {
-            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12 mb-3">
+            <div class="col-4">
                 <MUNity.BlazorServer.Components.Conference.Committee.CommitteeCardComponent CommitteeId=@committeeId />
             </div>
         }
     </div>
 
     <div class="row">
-        <div class="col-6">
+        <div class="col-xl-4 col-lg-6">
             <TeamCardComponent ConferenceId=@this.Id />
         </div>
 
-        <div class="col-6">
+        <div class="col-3">
             <RepresentedCountriesComponent ConferenceId=@this.Id />
         </div>
     </div>
