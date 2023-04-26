@@ -15,16 +15,23 @@
 @inject BServices.VirtualCommiteeParticipationService virtualCommitteeParticipation
 @inject BServices.PresentationViewsService presentationViewService
 @inject Services.ResolutionService resolutionService
-@inject ILogger<VirtualCommitteeSessionPage> logger
 
+@*
+@inject Blazored.LocalStorage.ILocalStorageService localStorageService
+
+@inject BServices.VirtualCommitteeExchangeService vcExchangeService
+@inject Services.UserConferenceAuthService conferenceAuthService
+
+@inject ILogger<VirtualCommitteeSessionPage> logger*@
 
 @if (isInited)
 {
     <MUNity.BlazorServer.Components.VirtualCommittee.VirtualCommitteeBootstrap CommitteeId=@CommitteeId>
         
-
         @if (!string.IsNullOrEmpty(SessionId))
         {
+            
+                
             <MUNity.BlazorServer.Components.VirtualCommittee.PropsitionsComponent SessionId=@SessionId />
         }
         else if (!string.IsNullOrEmpty(ResolutionId))
@@ -33,7 +40,7 @@
             {
                 <AuthorizeView>
                     <Authorized>
-                        <button class="btn btn-primary mb-3" @onclick="() => SetResolutionToPresentation(this.ResolutionId)">Resolution auf die Präsentationsfolie setzen</button>
+                        <button class="btn btn-primary" @onclick=SetResolutionToPresentation>Resolution auf die Präsentationsfolie setzen</button>
                     </Authorized>
                 </AuthorizeView>
                 <MUNity.BlazorServer.Components.Resolution.ResolutionEditorComponent ResolutionId=@ResolutionId />
@@ -43,6 +50,7 @@
                 <AuthorizeView>
                     <Authorized>
                         
+
                         <div class="row">
                             <div class="alert alert-info">
                                 <h3>Neue Resolution anlegen</h3>
@@ -76,7 +84,6 @@
                         }
                     </Authorized>
                 </AuthorizeView>
-
                 <table class="table">
                     <thead>
                         <tr>
@@ -84,11 +91,6 @@
                             <th>Thema</th>
                             <th>EinbringerIn</th>
                             <th>Status</th>
-                            <AuthorizeView>
-                                <Authorized>
-                                    <th>Anzeigen</th>
-                                </Authorized>
-                            </AuthorizeView>
                         </tr>
                     </thead>
                     <tbody>
@@ -99,22 +101,6 @@
                                 <td><a href="@($"/oc/{CommitteeId}/resolution/{resolution?.ResaElementId}")">@resolution?.Topic</a> </td>
                                 <td>@resolution?.RoleName</td>
                                 <td>@resolution?.State</td>
-                                <AuthorizeView>
-                                    <Authorized>
-                                        <th>
-                                            @if (!IsCurrentlyPresented(resolution.ResaElementId))
-                                            {
-                                                <button class="btn btn-outline-primary" @onclick="() => SetResolutionToPresentation(resolution.ResaElementId)">Präsentieren</button>
-                                            }
-                                            else
-                                            {
-                                                <button class="btn btn-primary" @onclick="() => SetResolutionToPresentation(null)">Nicht mehr anzeigen</button>
-                                            }
-
-                                        </th>
-                                        
-                                    </Authorized>
-                                </AuthorizeView>
                             </tr>
                         }
                     </tbody>
@@ -211,23 +197,13 @@ else
         virtualCommitteeParticipation.IsTeamMember = isTeamMember;
     }
 
-    private void SetResolutionToPresentation(string resolutionId)
+    private void SetResolutionToPresentation()
     {
         var presentation = presentationViewService.GetPresentation(CommitteeId);
         if (presentation != null)
         {
-            presentation.ResolutionId = resolutionId;
+            presentation.ResolutionId = ResolutionId;
         }
-    }
-
-    private bool IsCurrentlyPresented(string resolutionId)
-    {
-        var presentation = presentationViewService.GetPresentation(CommitteeId);
-        if (presentation != null)
-        {
-            return presentation.ResolutionId == resolutionId;
-        }
-        return false;
     }
 
     private void CreateResolution()

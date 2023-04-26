@@ -113,7 +113,7 @@ else
             }).FirstOrDefault();
 
             exchange.BannerChanged += delegate { InvokeAsync(StateHasChanged); };
-            if (committeeInfo?.ListOfSpeakersId != null)
+            if (committeeInfo.ListOfSpeakersId != null)
             {
                 this.listOfSpeakersViewModel = losService.GetViewModel(committeeInfo.ListOfSpeakersId);
                 this.listOfSpeakersViewModel.PropertyChanged += delegate { InvokeAsync(StateHasChanged); };

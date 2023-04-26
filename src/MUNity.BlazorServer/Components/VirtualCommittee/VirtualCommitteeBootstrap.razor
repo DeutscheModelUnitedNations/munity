@@ -28,14 +28,31 @@
         }
         else
         {
-            if (canCreateListOfSpeakers)
-            {
-                <span class="text-white">Es wurde noch keine Redeliste erstellt</span>
-                <button class="btn btn-sm btn-default" @onclick="CreateListOfSpeakers">Jetzt erstellen</button>
-            }
+        if (canCreateListOfSpeakers)
+        {
+            <span class="text-white">Es wurde noch keine Redeliste erstellt</span>
+            <button class="btn btn-sm btn-default" @onclick="CreateListOfSpeakers">Jetzt erstellen</button>
+        }
             
         }
     </div>
+    @*<div class="d-flex align-items-center hidden-md">
+        @if (exchange != null)
+        {
+            if (exchange.CurrentSessionExchange != null)
+            {
+                <h3 class="me-3 text-default">@exchange.CurrentSessionExchange.SessionName</h3>
+            }
+            else
+            {
+                <h3 class="me-3 text-default">Kein Sitzungsblock</h3>
+            }
+        }
+        else
+        {
+            <small class="text-danger">Exchange error!</small>
+        }
+    </div>*@
 </div>
 
 @if (exchange != null)
@@ -47,15 +64,10 @@
 
 
 <div class="row mt-1 me-1">
-    
     <div class="col-lg-3 col-sm-12 animate__animated animate__bounceInLeft">
-        @if (listOfSpeakersId != null)
-        {
-            <MUNity.BlazorServer.Components.VirtualCommittee.VCUsersComponent ListOfSpeakersId=@listOfSpeakersId MyRoleId=@virtualCommitteeParticipation.RoleId CommitteeId=@CommitteeId />
-        }
+        <MUNity.BlazorServer.Components.VirtualCommittee.VCUsersComponent MyRoleId=@virtualCommitteeParticipation.RoleId CommitteeId=@CommitteeId />
     </div>
 
-    <!-- Main content-->
     <div class="col-lg-9 col-sm-12">
         @if (exchange != null)
         {
@@ -150,7 +162,6 @@
             committeeName = committeeInfo.Name;
             listOfSpeakersId = committeeInfo.ListOfSpeakersId;
             canCreateListOfSpeakers = listOfSpeakersId == null && (await AuthStateTask).User.Identity.IsAuthenticated;
-            logger?.LogInformation("New Bootstrap for committee: {committeeId} with LoS: {listOfSpeakersId}", CommitteeId, listOfSpeakersId);
         }
         this.exchange = vcExchangeService.GetExchange(CommitteeId);
         if (exchange != null)
@@ -159,6 +170,7 @@
         }
         await InvokeAsync(StateHasChanged);
     }
+
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -173,7 +185,6 @@
             {
                 errorOnInit = true;
                 initError = ex.Message;
-                logger?.LogWarning(ex, "Internal problem");
             }
             await InvokeAsync(StateHasChanged);
         }

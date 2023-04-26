@@ -10,7 +10,7 @@
 		<div class="row">
 			@if (isEditing == false)
 			{
-				@if (string.IsNullOrWhiteSpace(Paragraph.Text) && !IsReaderMode)
+				@if (string.IsNullOrWhiteSpace(Paragraph.Text))
 				{
 					<button class="btn btn-sm btn-default" @onclick="StartEdit">Bearbeiten</button>
 				}
@@ -73,8 +73,6 @@
 
 	[Parameter]public bool IsLast { get; set; }
 
-	[Parameter] public bool IsReaderMode { get; set; }
-
 	[CascadingParameter] public Task<AuthenticationState> AuthStateTask { get; set; }
 
 	private bool displayTools = false;
@@ -112,9 +110,6 @@
 
 	private void StartEdit()
 	{
-		if (IsReaderMode)
-			return;
-
 		originalText = Paragraph.Text;
 		if (Exchange?.Resolution != null)
 		{

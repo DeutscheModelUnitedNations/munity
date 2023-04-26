@@ -69,7 +69,7 @@
 				}
 				else
 				{
-					@if (CanEdit && !IsReaderMode)
+					@if (CanEdit)
 					{
 						<button class="btn btn-sm btn-default" @onclick="StartEdit">Bearbeiten</button>
 					}
@@ -348,8 +348,6 @@
 
 @code {
 	[EditorRequired][Parameter]public bool CanEdit { get; set; }
-
-	[Parameter] public bool IsReaderMode { get; set; }
 
 	[EditorRequired][Parameter] public ResaOperativeParagraph Paragraph { get; set; }
 
