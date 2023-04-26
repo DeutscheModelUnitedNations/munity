@@ -22050,6 +22050,7 @@ code {
     }
 
     .note .note-content {
+        color: black;
         padding: 15px;
         -webkit-box-flex: 1;
         -ms-flex: 1;

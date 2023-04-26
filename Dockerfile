@@ -25,4 +25,5 @@ COPY src/MUNity.BlazorServer/demo.db .
 COPY src/MUNity.BlazorServer/demo.db-wal .
 ENV ASPNETCORE_URLS http://*:5000
 EXPOSE 5000
+RUN echo "Europe/Berlin" > /etc/timezone
 ENTRYPOINT ["dotnet", "MUNity.BlazorServer.dll"]
